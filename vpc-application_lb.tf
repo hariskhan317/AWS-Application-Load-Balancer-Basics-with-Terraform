@@ -1,10 +1,10 @@
-module "application-load-balancer" {
-    source  = "infrablocks/application-load-balancer/aws"
-    version = "4.1.0-rc.2"
+module "alb" {
+  source  = "terraform-aws-modules/alb/aws"
+  version = "~> 8.0"
     # insert the 5 required variables here
-    name = "Application_loadBalance"
+      name = "my-alb"
     load_balancer_type = "application" 
-    vpc_id = module.vpc.vpc.id
+    vpc_id = module.vpc.vpc_id
     subnets = [
         module.vpc.public_subnets[0],
         module.vpc.public_subnets[1]
@@ -35,12 +35,12 @@ module "application-load-balancer" {
             matcher             = "200-399"
         }
         targets = {
-            my_target = {
-                target_id = module.ec2_instance_private.id[0]
+            my_app1_vm1  = {
+                target_id = element([for instance in module.ec2_instance_private: instance.id],0)
                 port = 80 }
-            my_other_target = {
-                target_id = module.ec2_instance_private.id[1]
-                port = 8080 }
+            my_app1_vm2 = {
+                target_id = element([for instance in module.ec2_instance_private: instance.id],1)
+                port = 80 }
         }
     }]
 }
